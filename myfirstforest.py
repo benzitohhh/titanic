@@ -25,7 +25,7 @@ train_df['Gender'] = train_df['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
 
 # All missing Embarked -> just make them embark from most common place
 if len(train_df.Embarked[ train_df.Embarked.isnull() ]) > 0:
-    train_df.Embarked[ train_df.Embarked.isnull() ] = train_df.Embarked.dropna().mode().values
+     train_df.loc[ train_df.Embarked.isnull(), 'Embarked' ] = train_df.Embarked.dropna().mode().values
 
 Ports = list(enumerate(np.unique(train_df['Embarked'])))    # determine all values of Embarked,
 Ports_dict = { name : i for i, name in Ports }              # set up a dictionary in the form  Ports : index
@@ -51,10 +51,10 @@ test_df['Gender'] = test_df['Sex'].map( {'female': 0, 'male': 1} ).astype(int)
 # Embarked from 'C', 'Q', 'S'
 # All missing Embarked -> just make them embark from most common place
 if len(test_df.Embarked[ test_df.Embarked.isnull() ]) > 0:
-    test_df.Embarked[ test_df.Embarked.isnull() ] = test_df.Embarked.dropna().mode().values
+    test_df.loc[ test_df.Embarked.isnull(), 'Embarked' ] = test_df.Embarked.dropna().mode().values    
+
 # Again convert all Embarked strings to int
 test_df.Embarked = test_df.Embarked.map( lambda x: Ports_dict[x]).astype(int)
-
 
 # All the ages with no data -> make the median of all Ages
 median_age = test_df['Age'].dropna().median()
@@ -81,17 +81,17 @@ train_data = train_df.values
 test_data = test_df.values
 
 
-print 'Training...'
+print('Training...')
 forest = RandomForestClassifier(n_estimators=100)
 forest = forest.fit( train_data[0::,1::], train_data[0::,0] )
 
-print 'Predicting...'
+print('Predicting...')
 output = forest.predict(test_data).astype(int)
 
 
-predictions_file = open("myfirstforest.csv", "wb")
+predictions_file = open("myfirstforest.csv", "wt")
 open_file_object = csv.writer(predictions_file)
 open_file_object.writerow(["PassengerId","Survived"])
 open_file_object.writerows(zip(ids, output))
 predictions_file.close()
-print 'Done.'
+print('Done.')
